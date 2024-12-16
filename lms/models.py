@@ -1,7 +1,5 @@
 from django.db import models
 
-from django.db import models
-
 
 class Course(models.Model):
     title = models.CharField(max_length=255, verbose_name="Title")
@@ -16,6 +14,14 @@ class Course(models.Model):
         blank=True,
         null=True,
         verbose_name="Preview"
+    )
+    owner = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name="owned_courses",
+        verbose_name="Owner",
+        help_text="User who created this course",
+        default=1
     )
 
     class Meta:
@@ -34,6 +40,14 @@ class Lesson(models.Model):
     )
     preview = models.ImageField(upload_to="lesson_previews/", blank=True, null=True)
     video_url = models.URLField()
+    owner = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name="owned_lessons",
+        verbose_name="Owner",
+        help_text="User who created this lesson",
+        default=1
+    )
 
     class Meta:
         verbose_name = "lesson"
