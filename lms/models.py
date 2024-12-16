@@ -1,16 +1,21 @@
 from django.db import models
 
+from django.db import models
+
 
 class Course(models.Model):
-    name = models.CharField(
-        max_length=100, verbose_name="name of the course", help_text="Choose a course"
-    )
-    preview = models.ImageField(upload_to="course_previews/", blank=True, null=True)
+    title = models.CharField(max_length=255, verbose_name="Title")
     description = models.TextField(
         blank=True,
         null=True,
-        verbose_name="name of the course",
-        help_text="Choose a course",
+        verbose_name="Description",
+        help_text="Provide a description for the course"
+    )
+    preview = models.ImageField(
+        upload_to="course_previews/",
+        blank=True,
+        null=True,
+        verbose_name="Preview"
     )
 
     class Meta:

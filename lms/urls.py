@@ -2,19 +2,18 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 from lms.views import (
     CourseViewSet,
-    LessonCreateApiView,
-    LessonUpdateApiView,
-    LessonDestroyApiView,
-    LessonRetrieveApiView,
-    LessonListApiView,
-    LessonListCreateAPIView,
+    LessonViewSet, LessonListApiView, LessonRetrieveApiView, LessonCreateApiView, LessonDestroyApiView,
+    LessonUpdateApiView, LessonListCreateAPIView,
 )
+
 from lms.apps import LmsConfig
 
 app_name = LmsConfig.name
 
+
 router = SimpleRouter()
-router.register("courses", CourseViewSet)
+router.register("courses", CourseViewSet, basename="courses")
+router.register("lessons", LessonViewSet, basename="lessons")
 
 urlpatterns = [
     path("lesson/", LessonListApiView.as_view(), name="lesson_list"),
