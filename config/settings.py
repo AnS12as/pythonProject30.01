@@ -4,6 +4,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from tutorial.settings import BASE_DIR
 
+import lms
+
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -61,10 +63,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
+    'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ),
-
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'lms.paginators.StandardResultsPagination',
+    'PAGE_SIZE': 10,
 }
 
 DATABASES = {
