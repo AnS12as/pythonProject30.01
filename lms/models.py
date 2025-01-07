@@ -67,3 +67,14 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f"{self.user.email} subscribed to {self.course.title}"
+
+
+class Payment(models.Model):
+    product_name = models.CharField(max_length=255)
+    product_description = models.TextField(null=True, blank=True)
+    product_price = models.DecimalField(max_digits=10, decimal_places=2)
+    stripe_product_id = models.CharField(max_length=255, null=True, blank=True)
+    stripe_price_id = models.CharField(max_length=255, null=True, blank=True)
+    stripe_session_id = models.CharField(max_length=255, null=True, blank=True)
+    payment_url = models.URLField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)

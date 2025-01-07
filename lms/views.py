@@ -1,3 +1,6 @@
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import (
@@ -11,14 +14,18 @@ from rest_framework.generics import (
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import Course, Subscription
+from .models import Course, Subscription, Payment
 
 from users.permissions import IsModerator, IsOwner
 from .models import Course, Lesson
 from .paginators import StandardResultsPagination
 from .serializer import CourseSerializer, LessonSerializer, CourseDetailSerializer
+from .services import create_stripe_checkout_session, create_stripe_price, create_stripe_product
 
 
+@method_decorator(name='list', decorator=swagger_auto_schema(
+    operation_description="description from swagger_auto_schema via method_decorator"
+))
 class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
@@ -104,3 +111,38 @@ class SubscriptionAPIView(APIView):
             message = "Subscription added"
 
         return Response({"message": message})
+
+
+class CreatePaymentView(APIView):
+    def post(self, request):
+        data = request.data
+        product_name = data.get("product_name")
+        product_description = data.get("product_description", "")
+        product_price = data.get("product_price")
+
+        if not product_name or not product_price:
+            return Response({"error": "Product name and price are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+
+            product = create_stripe_product(product_name, product_description)
+
+            price = create_stripe_price(product["id"], product_price)
+
+            success_url = "http://127.0.0.1:8000/success/"
+            cancel_url = "http://127.0.0.1:8000/cancel/"
+            session = create_stripe_checkout_session(price["id"], success_url, cancel_url)
+
+            payment = Payment.objects.create(
+                product_name=product_name,
+                product_description=product_description,
+                product_price=product_price,
+                stripe_product_id=product["id"],
+                stripe_price_id=price["id"],
+                stripe_session_id=session["id"],
+                payment_url=session["url"],
+            )
+
+            return Response({"payment_url": session["url"]}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
