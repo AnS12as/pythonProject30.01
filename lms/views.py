@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -21,6 +22,7 @@ from .models import Course, Lesson
 from .paginators import StandardResultsPagination
 from .serializer import CourseSerializer, LessonSerializer, CourseDetailSerializer
 from .services import create_stripe_checkout_session, create_stripe_price, create_stripe_product
+from .tasks import send_course_update_email
 
 
 @method_decorator(name='list', decorator=swagger_auto_schema(
@@ -146,3 +148,19 @@ class CreatePaymentView(APIView):
             return Response({"payment_url": session["url"]}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def update_course(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+
+    course.materials_updated = True
+    course.save()
+
+    subscribers = Subscription.objects.filter(course=course).values_list('user__email', flat=True)
+
+    subject = f"Обновление материала курса: {course.title}"
+    message = f"Материалы курса '{course.title}' были обновлены. Проверьте их на сайте."
+
+    send_course_update_email.delay(subject, message, list(subscribers))
+
+    return JsonResponse({'status': 'success', 'message': 'Курс обновлен, пользователи уведомлены.'})

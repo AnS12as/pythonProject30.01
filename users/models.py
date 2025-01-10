@@ -49,6 +49,7 @@ class User(AbstractUser):
         help_text="Upload your photo",
     )
 
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 

@@ -3,8 +3,11 @@ from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 from tutorial.settings import BASE_DIR
-
 import lms
+
+from dotenv import load_dotenv
+
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 
 load_dotenv()
 
@@ -27,6 +30,7 @@ INSTALLED_APPS = [
     "lms",
     "django_filters",
     'drf_yasg',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -121,3 +125,19 @@ SIMPLE_JWT = {
 
 STRIPE_SECRET_KEY = "sk_test_your_secret_key"
 STRIPE_PUBLISHABLE_KEY = "pk_test_your_publishable_key"
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True
+
+EMAIL_BACKEND = ('EMAIL_BACKEND')
+EMAIL_HOST = ('EMAIL_HOST')
+EMAIL_PORT = ('EMAIL_PORT')
+EMAIL_USE_TLS = ('EMAIL_USE_TLS')
+EMAIL_HOST_USER = ('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = ('EMAIL_HOST_PASSWORD')
+
+
